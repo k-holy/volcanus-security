@@ -1,0 +1,23 @@
+{
+    "name": "volcanus/security",
+    "homepage": "https://github.com/k-holy/volcanus-security",
+    "type": "library",
+    "version": "1.0.0",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "k-holy",
+            "email": "k.holy74@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-0": { "Volcanus\\Security": "src/" }
+    },
+    "require": {
+        "php": ">=5.3.3",
+        "ext-mcrypt" : "*"
+    },
+    "require-dev": {
+        "satooshi/php-coveralls": "dev-master"
+    }
+}
