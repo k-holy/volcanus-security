@@ -6,7 +6,7 @@
  * @license The MIT License (MIT)
  */
 
-namespace Volcanus\Security\Crypt;
+namespace Volcanus\Security;
 
 /**
  * Mcrypt暗号化処理クラス
