@@ -6,16 +6,16 @@
  * @license The MIT License (MIT)
  */
 
-namespace Volcanus\Security\Test;
+namespace Volcanus\Security\Test\Crypt;
 
-use Volcanus\Security\McryptPasswordProcessor;
+use Volcanus\Security\Crypt\McryptEncryptor;
 
 /**
- * Test for McryptPasswordProcessor
+ * Test for McryptEncryptor
  *
  * @author k.holy74@gmail.com
  */
-class McryptPasswordProcessorTest extends \PHPUnit_Framework_TestCase
+class McryptEncryptorTest extends \PHPUnit_Framework_TestCase
 {
 
 	private function createEncryptee()
@@ -28,7 +28,7 @@ class McryptPasswordProcessorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testRaiseExceptionWhenUnsupportedAlgorithmWasSpecified()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => 'unsupported-algorithm',
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
@@ -40,45 +40,45 @@ class McryptPasswordProcessorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testRaiseExceptionWhenUnsupportedModeWasSpecified()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => 'unsupported-mode',
 			'base64Encode' => true,
 		));
 	}
 
-	public function testCreateCryptKey()
+	public function testCreateKey()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
 		));
-		$key = $processor->createCryptKey();
-		$this->assertEquals($processor->getCryptKeySize(), strlen($key));
+		$key = $processor->createKey();
+		$this->assertEquals($processor->getKeySize(), strlen($key));
 	}
 
-	public function testCreateCryptIv()
+	public function testCreateIv()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
 		));
-		$iv = $processor->createCryptIv();
-		$this->assertEquals($processor->getCryptIvSize(), strlen($iv));
+		$iv = $processor->createIv();
+		$this->assertEquals($processor->getIvSize(), strlen($iv));
 	}
 
 	public function testEncryptAndDecrypt()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
 		));
 
-		$key = $processor->createCryptKey();
-		$iv  = $processor->createCryptIv();
+		$key = $processor->createKey();
+		$iv  = $processor->createIv();
 
 		$encryptee = $this->createEncryptee();
 
@@ -94,14 +94,14 @@ class McryptPasswordProcessorTest extends \PHPUnit_Framework_TestCase
 
 	public function testEncryptAndDecryptByConfig()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
 		));
 
-		$processor->config('cryptKey', $processor->createCryptKey());
-		$processor->config('cryptIv', $processor->createCryptIv());
+		$processor->config('key', $processor->createKey());
+		$processor->config('iv', $processor->createIv());
 
 		$encryptee = $this->createEncryptee();
 
@@ -115,15 +115,15 @@ class McryptPasswordProcessorTest extends \PHPUnit_Framework_TestCase
 
 	public function testEncryptAndDecryptWithSalt()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
 			'saltLength'   => 16,
 		));
 
-		$key = $processor->createCryptKey();
-		$iv  = $processor->createCryptIv();
+		$key = $processor->createKey();
+		$iv  = $processor->createIv();
 
 		$encryptee = $this->createEncryptee();
 
@@ -139,15 +139,15 @@ class McryptPasswordProcessorTest extends \PHPUnit_Framework_TestCase
 
 	public function testEncryptAndDecryptPaddingPkcs7()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
-			'padding'      => McryptPasswordProcessor::PADDING_PKCS7,
+			'padding'      => McryptEncryptor::PADDING_PKCS7,
 			'base64Encode' => true,
 		));
 
-		$key = $processor->createCryptKey();
-		$iv  = $processor->createCryptIv();
+		$key = $processor->createKey();
+		$iv  = $processor->createIv();
 
 		$encryptee = $this->createEncryptee();
 
@@ -162,20 +162,20 @@ class McryptPasswordProcessorTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * アルゴリズム、モード、CryptKey、CriptIvが同一の設定で暗号化した結果は同じ
+	 * アルゴリズム、モード、Key、CriptIvが同一の設定で暗号化した結果は同じ
 	 */
-	public function testEncryptIsMatchWhenSameCryptKeyAndCryptIv()
+	public function testEncryptIsMatchWhenSameKeyAndIv()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
 		));
 
-		$key = $processor->createCryptKey();
-		$iv  = $processor->createCryptIv();
+		$key = $processor->createKey();
+		$iv  = $processor->createIv();
 
-		$processor2 = new McryptPasswordProcessor(array(
+		$processor2 = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
@@ -197,28 +197,28 @@ class McryptPasswordProcessorTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * アルゴリズム、モード、CryptKey、CriptIvが同一の設定で暗号化した結果は同じ
+	 * アルゴリズム、モード、Key、CriptIvが同一の設定で暗号化した結果は同じ
 	 */
-	public function testEncryptIsMatchWhenSameCryptKeyAndCryptIvByConfig()
+	public function testEncryptIsMatchWhenSameKeyAndIvByConfig()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
 		));
 
-		$key = $processor->createCryptKey();
-		$iv  = $processor->createCryptIv();
+		$key = $processor->createKey();
+		$iv  = $processor->createIv();
 
-		$processor->config('cryptKey', $key);
-		$processor->config('cryptIv', $iv);
+		$processor->config('key', $key);
+		$processor->config('iv', $iv);
 
-		$processor2 = new McryptPasswordProcessor(array(
+		$processor2 = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
-			'cryptKey'     => $key,
-			'cryptIv'      => $iv,
+			'key' => $key,
+			'iv' => $iv,
 		));
 
 		$encryptee = $this->createEncryptee();
@@ -237,56 +237,56 @@ class McryptPasswordProcessorTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * CryptKeyが異なる設定で暗号化した結果は同一ではない
+	 * Keyが異なる設定で暗号化した結果は同一ではない
 	 */
-	public function testEncryptIsNotMatchWhenCryptKeyIsNotSame()
+	public function testEncryptIsNotMatchWhenKeyIsNotSame()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
 		));
 
-		$iv  = $processor->createCryptIv();
+		$iv  = $processor->createIv();
 
-		$processor2 = new McryptPasswordProcessor(array(
+		$processor2 = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_ECB,
 			'base64Encode' => true,
-			'cryptIv'      => $iv,
+			'iv'      => $iv,
 		));
 
 		$encryptee = $this->createEncryptee();
 
 		$this->assertNotEquals(
-			$processor->encrypt($encryptee, $processor->createCryptKey(), $iv),
-			$processor2->encrypt($encryptee, $processor2->createCryptKey(), $iv)
+			$processor->encrypt($encryptee, $processor->createKey(), $iv),
+			$processor2->encrypt($encryptee, $processor2->createKey(), $iv)
 		);
 	}
 
 	/**
-	 * CryptKeyが異なる設定で暗号化した結果は同一ではない
+	 * Keyが異なる設定で暗号化した結果は同一ではない
 	 */
-	public function testEncryptIsNotMatchWhenCryptKeyIsNotSameByConfig()
+	public function testEncryptIsNotMatchWhenKeyIsNotSameByConfig()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
 		));
 
-		$iv  = $processor->createCryptIv();
+		$iv  = $processor->createIv();
 
-		$processor->config('cryptKey', $processor->createCryptKey());
-		$processor->config('cryptIv', $iv);
+		$processor->config('key', $processor->createKey());
+		$processor->config('iv', $iv);
 
-		$processor2 = new McryptPasswordProcessor(array(
+		$processor2 = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_ECB,
 			'base64Encode' => true,
-			'cryptIv'      => $iv,
+			'iv' => $iv,
 		));
-		$processor2->config('cryptKey', $processor2->createCryptKey());
+		$processor2->config('key', $processor2->createKey());
 
 		$encryptee = $this->createEncryptee();
 
@@ -297,19 +297,19 @@ class McryptPasswordProcessorTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * CryptIvが異なる設定で暗号化した結果は同一ではない
+	 * Ivが異なる設定で暗号化した結果は同一ではない
 	 */
-	public function testEncryptIsNotMatchWhenCryptIvIsNotSame()
+	public function testEncryptIsNotMatchWhenIvIsNotSame()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
 		));
 
-		$key = $processor->createCryptKey();
+		$key = $processor->createKey();
 
-		$processor2 = new McryptPasswordProcessor(array(
+		$processor2 = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_ECB,
 			'base64Encode' => true,
@@ -318,34 +318,34 @@ class McryptPasswordProcessorTest extends \PHPUnit_Framework_TestCase
 		$encryptee = $this->createEncryptee();
 
 		$this->assertNotEquals(
-			$processor->encrypt($encryptee, $key, $processor->createCryptIv()),
-			$processor2->encrypt($encryptee, $key, $processor2->createCryptIv())
+			$processor->encrypt($encryptee, $key, $processor->createIv()),
+			$processor2->encrypt($encryptee, $key, $processor2->createIv())
 		);
 	}
 
 	/**
-	 * CryptIvが異なる設定で暗号化した結果は同一ではない
+	 * Ivが異なる設定で暗号化した結果は同一ではない
 	 */
-	public function testEncryptIsNotMatchWhenCryptIvIsNotSameByConfig()
+	public function testEncryptIsNotMatchWhenIvIsNotSameByConfig()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
 		));
 
-		$key = $processor->createCryptKey();
+		$key = $processor->createKey();
 
-		$processor->config('cryptKey', $key);
-		$processor->config('cryptIv', $processor->createCryptIv());
+		$processor->config('key', $key);
+		$processor->config('iv', $processor->createIv());
 
-		$processor2 = new McryptPasswordProcessor(array(
+		$processor2 = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_ECB,
 			'base64Encode' => true,
-			'cryptKey'     => $key,
+			'key' => $key,
 		));
-		$processor2->config('cryptIv', $processor2->createCryptIv());
+		$processor2->config('iv', $processor2->createIv());
 
 		$encryptee = $this->createEncryptee();
 
@@ -360,16 +360,16 @@ class McryptPasswordProcessorTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testEncryptIsNotMatchWhenModeIsNotSame()
 	{
-		$processor = new McryptPasswordProcessor(array(
+		$processor = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'base64Encode' => true,
 		));
 
-		$key = $processor->createCryptKey();
-		$iv  = $processor->createCryptIv();
+		$key = $processor->createKey();
+		$iv  = $processor->createIv();
 
-		$processor2 = new McryptPasswordProcessor(array(
+		$processor2 = new McryptEncryptor(array(
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_ECB,
 			'base64Encode' => true,

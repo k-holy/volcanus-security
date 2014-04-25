@@ -6,14 +6,14 @@
  * @license The MIT License (MIT)
  */
 
-namespace Volcanus\Security;
+namespace Volcanus\Security\Crypt;
 
 /**
- * 可逆パスワード処理インタフェース
+ * 暗号化処理インタフェース
  *
  * @author k.holy74@gmail.com
  */
-interface ReversiblePasswordProcessorInterface
+interface EncryptorInterface
 {
 
 	/**

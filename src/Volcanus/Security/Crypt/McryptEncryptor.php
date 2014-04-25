@@ -6,14 +6,14 @@
  * @license The MIT License (MIT)
  */
 
-namespace Volcanus\Security;
+namespace Volcanus\Security\Crypt;
 
 /**
- * Mcryptパスワード処理クラス
+ * Mcrypt暗号化処理クラス
  *
  * @author k.holy74@gmail.com
  */
-class McryptPasswordProcessor implements ReversiblePasswordProcessorInterface
+class McryptEncryptor implements EncryptorInterface
 {
 
 	const PADDING_PKCS7 = 'pkcs7';
@@ -66,8 +66,8 @@ class McryptPasswordProcessor implements ReversiblePasswordProcessorInterface
 		$this->config['algorithm'] = null;
 		$this->config['mode'] = null;
 		$this->config['padding'] = self::PADDING_NULL;
-		$this->config['cryptKey'] = null;
-		$this->config['cryptIv'] = null;
+		$this->config['key'] = null;
+		$this->config['iv'] = null;
 		$this->config['saltLength'] = 0;
 		if (!empty($configurations)) {
 			foreach ($configurations as $name => $value) {
@@ -94,8 +94,8 @@ class McryptPasswordProcessor implements ReversiblePasswordProcessorInterface
 			if (isset($value)) {
 				switch ($name) {
 				case 'padding':
-				case 'cryptKey':
-				case 'cryptIv':
+				case 'key':
+				case 'iv':
 					if (!is_string($value)) {
 						throw new \InvalidArgumentException(
 							sprintf('The config "%s" only accepts string.', $name));
@@ -156,7 +156,7 @@ class McryptPasswordProcessor implements ReversiblePasswordProcessorInterface
 	 *
 	 * @return int 暗号キーのサイズ
 	 */
-	public function getCryptKeySize()
+	public function getKeySize()
 	{
 		return mcrypt_enc_get_key_size($this->getModule());
 	}
@@ -166,9 +166,9 @@ class McryptPasswordProcessor implements ReversiblePasswordProcessorInterface
 	 *
 	 * @return string 暗号キー
 	 */
-	public function createCryptKey()
+	public function createKey()
 	{
-		return $this->createRandomBytes($this->getCryptKeySize());
+		return $this->createRandomBytes($this->getKeySize());
 	}
 
 	/**
@@ -176,7 +176,7 @@ class McryptPasswordProcessor implements ReversiblePasswordProcessorInterface
 	 *
 	 * @return int 暗号初期化ベクトル(IV)のサイズ
 	 */
-	public function getCryptIvSize()
+	public function getIvSize()
 	{
 		return mcrypt_enc_get_iv_size($this->getModule());
 	}
@@ -186,9 +186,9 @@ class McryptPasswordProcessor implements ReversiblePasswordProcessorInterface
 	 *
 	 * @return string 暗号初期化ベクトル(IV)
 	 */
-	public function createCryptIv()
+	public function createIv()
 	{
-		return $this->createRandomBytes($this->getCryptIvSize());
+		return $this->createRandomBytes($this->getIvSize());
 	}
 
 	/**
@@ -299,17 +299,17 @@ class McryptPasswordProcessor implements ReversiblePasswordProcessorInterface
 		$module = $this->getModule();
 
 		if ($key === null || strlen($key) === 0) {
-			$key = $this->config('cryptKey');
+			$key = $this->config('key');
 		}
 		if ($key === null || strlen($key) === 0) {
-			throw new \RuntimeException('Set config "cryptKey" for encrypt.');
+			throw new \RuntimeException('Set config "key" for encrypt.');
 		}
 
 		if ($iv === null || strlen($iv) === 0) {
-			$iv = $this->config('cryptIv');
+			$iv = $this->config('iv');
 		}
 		if ($iv === null || strlen($iv) === 0) {
-			throw new \RuntimeException('Set config "cryptIv" for encrypt.');
+			throw new \RuntimeException('Set config "iv" for encrypt.');
 		}
 
 		$key_size = mcrypt_enc_get_key_size($module);
