@@ -18,6 +18,72 @@ use Volcanus\Security\HashProcessor;
 class HashProcessorTest extends \PHPUnit_Framework_TestCase
 {
 
+	/**
+	 * @expectedException \RuntimeException
+	 */
+	public function testHashRaiseExceptionWhenUnsupportedAlgorithmWasSpecified()
+	{
+		$processor = new HashProcessor(array(
+			'algorithm'       => 'unsupported-algorithm',
+			'stretchingCount' => 100,
+		));
+		$processor->hash('develop', 'test');
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigAlgorithmRaiseInvalidArgumentException()
+	{
+		$processor = new HashProcessor();
+		$processor->config('algorithm', 1);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigRandomCharsRaiseInvalidArgumentException()
+	{
+		$processor = new HashProcessor();
+		$processor->config('randomChars', 1);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigStretchingCountRaiseInvalidArgumentException()
+	{
+		$processor = new HashProcessor();
+		$processor->config('stretchingCount', 'true');
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigRandomLengthRaiseInvalidArgumentException()
+	{
+		$processor = new HashProcessor();
+		$processor->config('randomLength', 'true');
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testRaiseInvalidArgumentExceptionWhenUnsupportedConfigKey()
+	{
+		$processor = new HashProcessor();
+		$processor->config('unsupportedConfigKey', 1);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testRaiseInvalidArgumentExceptionWhenInvalidArgumentCount()
+	{
+		$processor = new HashProcessor();
+		$processor->config('randomLength', 1, 2);
+	}
+
 	public function testCreateRandom()
 	{
 		$processor = new HashProcessor(array(
@@ -137,7 +203,7 @@ class HashProcessorTest extends \PHPUnit_Framework_TestCase
 		);
 	}
 
-	public function testHashIsNotMatchWhenAlgorhythmIsNotSame()
+	public function testHashIsNotMatchWhenAlgorithmIsNotSame()
 	{
 		$processor1 = new HashProcessor(array(
 			'algorithm'       => 'sha256',
@@ -173,72 +239,6 @@ class HashProcessorTest extends \PHPUnit_Framework_TestCase
 			$processor1->hash('develop', 'test'),
 			$processor2->hash('develop', 'test')
 		);
-	}
-
-	/**
-	 * @expectedException \RuntimeException
-	 */
-	public function testHashRaiseExceptionWhenUnsupportedAlgorhythm()
-	{
-		$processor = new HashProcessor(array(
-			'algorithm'       => 'unsupported-algorithm',
-			'stretchingCount' => 100,
-		));
-		$processor->hash('develop', 'test');
-	}
-
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testConfigAlgorithmRaiseInvalidArgumentException()
-	{
-		$processor = new HashProcessor();
-		$processor->config('algorithm', 1);
-	}
-
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testConfigRandomCharsRaiseInvalidArgumentException()
-	{
-		$processor = new HashProcessor();
-		$processor->config('randomChars', 1);
-	}
-
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testConfigStretchingCountRaiseInvalidArgumentException()
-	{
-		$processor = new HashProcessor();
-		$processor->config('stretchingCount', 'true');
-	}
-
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testConfigRandomLengthRaiseInvalidArgumentException()
-	{
-		$processor = new HashProcessor();
-		$processor->config('randomLength', 'true');
-	}
-
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testRaiseInvalidArgumentExceptionWhenUnsupportedConfigKey()
-	{
-		$processor = new HashProcessor();
-		$processor->config('unsupportedConfigKey', 1);
-	}
-
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testRaiseInvalidArgumentExceptionWhenInvalidArgumentCount()
-	{
-		$processor = new HashProcessor();
-		$processor->config('randomLength', 1, 2);
 	}
 
 }

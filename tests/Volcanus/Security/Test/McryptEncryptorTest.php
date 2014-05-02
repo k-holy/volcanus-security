@@ -47,6 +47,87 @@ class McryptEncryptorTest extends \PHPUnit_Framework_TestCase
 		));
 	}
 
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigPaddingRaiseInvalidArgumentException()
+	{
+		$encryptor = new McryptEncryptor();
+		$encryptor->config('padding', 1);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigKeyRaiseInvalidArgumentException()
+	{
+		$encryptor = new McryptEncryptor();
+		$encryptor->config('key', 1);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigIvRaiseInvalidArgumentException()
+	{
+		$encryptor = new McryptEncryptor();
+		$encryptor->config('iv', 1);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigSaltLengthRaiseInvalidArgumentException()
+	{
+		$encryptor = new McryptEncryptor();
+		$encryptor->config('saltLength', 'true');
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigBase64EncodeRaiseInvalidArgumentException()
+	{
+		$encryptor = new McryptEncryptor();
+		$encryptor->config('base64Encode', 'true');
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigAlgorithmRaiseInvalidArgumentException()
+	{
+		$encryptor = new McryptEncryptor();
+		$encryptor->config('algorithm', 1);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testRaiseInvalidArgumentExceptionWhenUnsupportedConfigKey()
+	{
+		$encryptor = new McryptEncryptor();
+		$encryptor->config('unsupportedConfigKey', 1);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigModeRaiseInvalidArgumentException()
+	{
+		$encryptor = new McryptEncryptor();
+		$encryptor->config('mode', 1);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testRaiseInvalidArgumentExceptionWhenInvalidArgumentCount()
+	{
+		$encryptor = new McryptEncryptor();
+		$encryptor->config('saltLength', 1, 2);
+	}
+
 	public function testCreateKey()
 	{
 		$encryptor = new McryptEncryptor(array(
@@ -143,6 +224,30 @@ class McryptEncryptorTest extends \PHPUnit_Framework_TestCase
 			'algorithm'    => MCRYPT_BLOWFISH,
 			'mode'         => MCRYPT_MODE_CBC,
 			'padding'      => McryptEncryptor::PADDING_PKCS7,
+			'base64Encode' => true,
+		));
+
+		$key = $encryptor->createKey();
+		$iv  = $encryptor->createIv();
+
+		$encryptee = $this->createEncryptee();
+
+		$this->assertEquals(
+			$encryptee,
+			$encryptor->decrypt(
+				$encryptor->encrypt($encryptee, $key, $iv),
+				$key,
+				$iv
+			)
+		);
+	}
+
+	public function testEncryptAndDecryptNoPadding()
+	{
+		$encryptor = new McryptEncryptor(array(
+			'algorithm'    => MCRYPT_BLOWFISH,
+			'mode'         => MCRYPT_MODE_CBC,
+			'padding'      => null,
 			'base64Encode' => true,
 		));
 
@@ -381,6 +486,102 @@ class McryptEncryptorTest extends \PHPUnit_Framework_TestCase
 			$encryptor->encrypt($encryptee, $key, $iv),
 			$encryptor2->encrypt($encryptee, $key, $iv)
 		);
+	}
+
+	/**
+	 * @expectedException \RuntimeException
+	 */
+	public function testEncryptRaiseRuntimeExceptionWhenAlgorithmIsNotSet()
+	{
+		$encryptor = new McryptEncryptor(array(
+			'algorithm'    => null,
+			'mode'         => MCRYPT_MODE_CBC,
+			'padding'      => null,
+			'base64Encode' => true,
+		));
+		$key = $encryptor->createKey();
+		$iv  = $encryptor->createIv();
+		$encryptor->encrypt($this->createEncryptee(), $key, $iv);
+	}
+
+	/**
+	 * @expectedException \RuntimeException
+	 */
+	public function testEncryptRaiseRuntimeExceptionWhenModeIsNotSet()
+	{
+		$encryptor = new McryptEncryptor(array(
+			'algorithm'    => MCRYPT_BLOWFISH,
+			'mode'         => null,
+			'padding'      => null,
+			'base64Encode' => true,
+		));
+		$key = $encryptor->createKey();
+		$iv  = $encryptor->createIv();
+		$encryptor->encrypt($this->createEncryptee(), $key, $iv);
+	}
+
+	/**
+	 * @expectedException \RuntimeException
+	 */
+	public function testEncryptRaiseRuntimeExceptionWhenKeyIsNotSpecified()
+	{
+		$encryptor = new McryptEncryptor(array(
+			'algorithm'    => MCRYPT_BLOWFISH,
+			'mode'         => MCRYPT_MODE_CBC,
+			'padding'      => null,
+			'base64Encode' => true,
+		));
+		$key = null;
+		$iv  = $encryptor->createIv();
+		$encryptor->encrypt($this->createEncryptee(), $key, $iv);
+	}
+
+	/**
+	 * @expectedException \RuntimeException
+	 */
+	public function testEncryptRaiseRuntimeExceptionWhenIvIsNotSpecified()
+	{
+		$encryptor = new McryptEncryptor(array(
+			'algorithm'    => MCRYPT_BLOWFISH,
+			'mode'         => MCRYPT_MODE_CBC,
+			'padding'      => null,
+			'base64Encode' => true,
+		));
+		$key = $encryptor->createKey();
+		$iv = null;
+		$encryptor->encrypt($this->createEncryptee(), $key, $iv);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testEncryptRaiseInvalidArgumentExceptionWhenKeySizeOver()
+	{
+		$encryptor = new McryptEncryptor(array(
+			'algorithm'    => MCRYPT_BLOWFISH,
+			'mode'         => MCRYPT_MODE_CBC,
+			'padding'      => null,
+			'base64Encode' => true,
+		));
+		$key = $encryptor->createKey() . 'a';
+		$iv  = $encryptor->createIv();
+		$encryptor->encrypt($this->createEncryptee(), $key, $iv);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testEncryptRaiseInvalidArgumentExceptionWhenIvSizeOver()
+	{
+		$encryptor = new McryptEncryptor(array(
+			'algorithm'    => MCRYPT_BLOWFISH,
+			'mode'         => MCRYPT_MODE_CBC,
+			'padding'      => null,
+			'base64Encode' => true,
+		));
+		$key = $encryptor->createKey();
+		$iv  = $encryptor->createIv() . 'a';
+		$encryptor->encrypt($this->createEncryptee(), $key, $iv);
 	}
 
 }
