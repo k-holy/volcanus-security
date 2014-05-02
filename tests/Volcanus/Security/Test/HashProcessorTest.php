@@ -29,6 +29,30 @@ class HashProcessorTest extends \PHPUnit_Framework_TestCase
 		$this->assertTrue(strspn($random, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') === strlen($random));
 	}
 
+	/**
+	 * @expectedException \RuntimeException
+	 */
+	public function testCreateRandomRaiseExceptionWhenRandomLengthIsEmpty()
+	{
+		$processor = new HashProcessor(array(
+			'randomLength' => 0,
+			'randomChars'  => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+		));
+		$processor->createRandom();
+	}
+
+	/**
+	 * @expectedException \RuntimeException
+	 */
+	public function testCreateRandomRaiseExceptionWhenRandomCharsIsEmpty()
+	{
+		$processor = new HashProcessor(array(
+			'randomLength' => 500,
+			'randomChars'  => '',
+		));
+		$processor->createRandom();
+	}
+
 	public function testHashIsMatch()
 	{
 		$processor1 = new HashProcessor(array(
@@ -49,6 +73,29 @@ class HashProcessorTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals(
 			$processor1->hash('foo', 'bar'),
 			$processor2->hash('foo', 'bar')
+		);
+	}
+
+	public function testHashIsMatchWithoutSalt()
+	{
+		$processor1 = new HashProcessor(array(
+			'algorithm'       => 'sha256',
+			'stretchingCount' => 100,
+		));
+
+		$processor2 = new HashProcessor(array(
+			'algorithm'       => 'sha256',
+			'stretchingCount' => 100,
+		));
+
+		// 同一アルゴリズム、同一ストレッチ回数、同一データ、ソルトなしの結果は等しい
+		$this->assertEquals(
+			$processor1->hash('develop'),
+			$processor2->hash('develop')
+		);
+		$this->assertEquals(
+			$processor1->hash('foo'),
+			$processor2->hash('foo')
 		);
 	}
 
@@ -138,6 +185,60 @@ class HashProcessorTest extends \PHPUnit_Framework_TestCase
 			'stretchingCount' => 100,
 		));
 		$processor->hash('develop', 'test');
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigAlgorithmRaiseInvalidArgumentException()
+	{
+		$processor = new HashProcessor();
+		$processor->config('algorithm', 1);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigRandomCharsRaiseInvalidArgumentException()
+	{
+		$processor = new HashProcessor();
+		$processor->config('randomChars', 1);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigStretchingCountRaiseInvalidArgumentException()
+	{
+		$processor = new HashProcessor();
+		$processor->config('stretchingCount', 'true');
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConfigRandomLengthRaiseInvalidArgumentException()
+	{
+		$processor = new HashProcessor();
+		$processor->config('randomLength', 'true');
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testRaiseInvalidArgumentExceptionWhenUnsupportedConfigKey()
+	{
+		$processor = new HashProcessor();
+		$processor->config('unsupportedConfigKey', 1);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testRaiseInvalidArgumentExceptionWhenInvalidArgumentCount()
+	{
+		$processor = new HashProcessor();
+		$processor->config('randomLength', 1, 2);
 	}
 
 }
