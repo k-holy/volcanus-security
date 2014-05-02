@@ -242,30 +242,6 @@ class McryptEncryptorTest extends \PHPUnit_Framework_TestCase
 		);
 	}
 
-	public function testEncryptAndDecryptNoPadding()
-	{
-		$encryptor = new McryptEncryptor(array(
-			'algorithm'    => MCRYPT_BLOWFISH,
-			'mode'         => MCRYPT_MODE_CBC,
-			'padding'      => null,
-			'base64Encode' => true,
-		));
-
-		$key = $encryptor->createKey();
-		$iv  = $encryptor->createIv();
-
-		$encryptee = $this->createEncryptee();
-
-		$this->assertEquals(
-			$encryptee,
-			$encryptor->decrypt(
-				$encryptor->encrypt($encryptee, $key, $iv),
-				$key,
-				$iv
-			)
-		);
-	}
-
 	/**
 	 * アルゴリズム、モード、Key、CriptIvが同一の設定で暗号化した結果は同じ
 	 */
