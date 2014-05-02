@@ -41,10 +41,8 @@ class HashProcessor implements HashProcessorInterface
 		$this->config = array();
 		$this->config['algorithm'      ] = 'sha256';
 		$this->config['stretchingCount'] = 0;
-		$this->config['saltLength'     ] = 64;
-		$this->config['saltChars'      ] = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-		$this->config['randomChars'    ] = 10;
-		$this->config['randomLength'   ] = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#%&+-./:=?[]_';
+		$this->config['randomChars'    ] = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#%&+-./:=?[]_';
+		$this->config['randomLength'   ] = 0;
 		if (!empty($configurations)) {
 			foreach ($configurations as $name => $value) {
 				$this->config($name, $value);
@@ -70,7 +68,6 @@ class HashProcessor implements HashProcessorInterface
 			if (isset($value)) {
 				switch ($name) {
 				case 'algorithm':
-				case 'saltChars':
 				case 'randomChars':
 					if (!is_string($value)) {
 						throw new \InvalidArgumentException(
@@ -78,7 +75,6 @@ class HashProcessor implements HashProcessorInterface
 					}
 					break;
 				case 'stretchingCount':
-				case 'saltLength':
 				case 'randomLength':
 					if (!is_int($value) && !ctype_digit($value)) {
 						throw new \InvalidArgumentException(
@@ -108,10 +104,7 @@ class HashProcessor implements HashProcessorInterface
 	public function hash($data, $salt = null)
 	{
 		if ($salt === null) {
-			$salt = $this->createRandom(
-				$this->config('saltLength'),
-				$this->config('saltChars')
-			);
+			$salt = '';
 		}
 
 		$stretchingCount = $this->config('stretchingCount');
@@ -151,7 +144,7 @@ class HashProcessor implements HashProcessorInterface
 		}
 
 		if ($chars === null) {
-			$chars = $this->config('randomChars') ?: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+			$chars = $this->config('randomChars');
 		}
 
 		if (strlen($chars) === 0) {
@@ -159,22 +152,6 @@ class HashProcessor implements HashProcessorInterface
 		}
 
 		return self::createRandomString($length, $chars);
-	}
-
-	/**
-	 * オブジェクトの文字列表現を返します。
-	 *
-	 * @return string
-	 */
-	public function __toString()
-	{
-		return print_r(
-			array(
-				'class' => get_class($this),
-				'config' => $this->config,
-			),
-			true
-		);
 	}
 
 	private function createRandomString($length, $chars)

@@ -238,22 +238,6 @@ class McryptEncryptor implements EncryptorInterface
 		return $decrypted;
 	}
 
-	/**
-	 * オブジェクトの文字列表現を返します。
-	 *
-	 * @return string
-	 */
-	public function __toString()
-	{
-		return print_r(
-			array(
-				'class' => get_class($this),
-				'config' => $this->config,
-			),
-			true
-		);
-	}
-
 	private function pad($data)
 	{
 		$blockSize = mcrypt_enc_get_block_size($this->module);

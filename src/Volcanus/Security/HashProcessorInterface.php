@@ -34,11 +34,4 @@ interface HashProcessorInterface
 	 */
 	public function createRandom($length = null, $chars = null);
 
-	/**
-	 * オブジェクトの文字列表現を返します。
-	 *
-	 * @return string
-	 */
-	public function __toString();
-
 }
