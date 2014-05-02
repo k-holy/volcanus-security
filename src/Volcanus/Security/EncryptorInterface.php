@@ -38,11 +38,4 @@ interface EncryptorInterface
 	 */
 	public function decrypt($encrypted, $key = null, $iv = null);
 
-	/**
-	 * オブジェクトの文字列表現を返します。
-	 *
-	 * @return string
-	 */
-	public function __toString();
-
 }

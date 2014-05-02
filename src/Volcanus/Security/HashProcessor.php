@@ -161,22 +161,6 @@ class HashProcessor implements HashProcessorInterface
 		return self::createRandomString($length, $chars);
 	}
 
-	/**
-	 * オブジェクトの文字列表現を返します。
-	 *
-	 * @return string
-	 */
-	public function __toString()
-	{
-		return print_r(
-			array(
-				'class' => get_class($this),
-				'config' => $this->config,
-			),
-			true
-		);
-	}
-
 	private function createRandomString($length, $chars)
 	{
 		$string = '';
