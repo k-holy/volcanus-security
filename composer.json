@@ -11,13 +11,10 @@
         }
     ],
     "autoload": {
-        "psr-0": { "Volcanus\\Security": "src/" }
+        "psr-4": { "Volcanus\\Security\\": "src/" }
     },
     "require": {
         "php": ">=5.3.3",
         "ext-mcrypt" : "*"
-    },
-    "require-dev": {
-        "satooshi/php-coveralls": "dev-master"
     }
 }
